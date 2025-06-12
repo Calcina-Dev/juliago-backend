@@ -15,4 +15,12 @@ class Producto extends Model
     return $this->belongsTo(Categoria::class);
 }
 
+public function menus()
+{
+    return $this->belongsToMany(Menu::class, 'menu_producto')
+                ->withPivot('precio')
+                ->withTimestamps();
+}
+
+
 }

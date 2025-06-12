@@ -49,5 +49,24 @@ class UserSeeder extends Seeder
                 'rol' => 'cocinero',
             ]
         );
+
+        // Usuarios Cliente ejemplo
+        User::updateOrCreate(
+            ['email' => 'cliente1@juliago.local'],
+            [
+                'name' => 'Cliente Uno',
+                'password' => Hash::make('cliente123'),
+                'rol' => 'cliente',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'cliente2@juliago.local'],
+            [
+                'name' => 'Cliente Dos',
+                'password' => Hash::make('cliente123'),
+                'rol' => 'cliente',
+            ]
+        );
     }
 }

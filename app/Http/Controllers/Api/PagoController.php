@@ -61,7 +61,7 @@ public function resumenDiario(Request $request)
 {
     $fecha = $request->get('fecha', now()->toDateString());
 
-    $pagos = Pago::whereDate('fecha_pago', $fecha)
+    $pagos = Pago::whereDate('pagado_en', $fecha)
         ->where('usuario_id', auth()->id())
         ->get();
 
@@ -89,7 +89,7 @@ public function resumenDiario(Request $request)
     $fecha = $request->get('fecha', now()->toDateString());
 
     $pagos = Pago::with('usuario')
-        ->whereDate('fecha_pago', $fecha)
+        ->whereDate('pagado_en', $fecha)
         ->get();
 
     $total = $pagos->sum('monto');
