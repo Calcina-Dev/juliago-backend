@@ -9,18 +9,24 @@ class Producto extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['nombre', 'precio', 'descripcion', 'categoria_id'];
+    protected $fillable = [
+        'nombre',
+        'precio',
+        'descripcion',
+        'categoria_id',
+        'imagen_url',
+        'activo',
+    ];
+
     public function categoria()
-{
-    return $this->belongsTo(Categoria::class);
-}
+    {
+        return $this->belongsTo(Categoria::class);
+    }
 
-public function menus()
-{
-    return $this->belongsToMany(Menu::class, 'menu_producto')
-                ->withPivot('precio')
-                ->withTimestamps();
-}
-
-
+    public function menus()
+    {
+        return $this->belongsToMany(Menu::class, 'menu_producto')
+                    ->withPivot('precio')
+                    ->withTimestamps();
+    }
 }

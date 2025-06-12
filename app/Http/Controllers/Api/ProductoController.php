@@ -9,9 +9,26 @@ class ProductoController extends Controller
 {
     public function index()
     {
-        return Producto::all();
-    }
+        $productos = Producto::with('categoria')
+            ->whereNull('deleted_at')
+            ->get()
+            ->map(function ($producto) {
+                return [
+                    'id' => $producto->id,
+                    'nombre' => $producto->nombre,
+                    'precio' => $producto->precio,
+                    'descripcion' => $producto->descripcion,
+                    'categoria_id' => $producto->categoria_id,
+                    'categoria_nombre' => optional($producto->categoria)->nombre,
+                    'imagen_url' => $producto->imagen_url ?? null,
+                    'activo' => $producto->activo ?? true,
+                    'created_at' => $producto->created_at,
+                    'updated_at' => $producto->updated_at,
+                ];
+            });
 
+        return response()->json($productos);
+    }
     public function store(Request $request)
     {
         $producto = Producto::create($request->all());
