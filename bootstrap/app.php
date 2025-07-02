@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
            // Alias para el middleware de roles
          $middleware->alias([
             'rol' => \App\Http\Middleware\VerificarRol::class,
+            'check.empresa' => \App\Http\Middleware\CheckEmpresa::class,
+
             ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

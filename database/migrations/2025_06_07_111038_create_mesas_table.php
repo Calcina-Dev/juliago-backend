@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('mesas', function (Blueprint $table) {
             $table->id();
-            $table->string('numero'); // puede ser texto o número
+           $table->string('nombre');
             $table->enum('estado', ['libre', 'ocupada', 'cerrada'])->default('libre');
             $table->string('descripcion')->nullable();
             $table->softDeletes(); // eliminación lógica

@@ -9,34 +9,39 @@ use App\Models\Pago;
 use App\Models\Mesa;
 use App\Models\User;
 use App\Models\Menu;
+use App\Models\Empresa;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Log;
 
 class PedidosTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $mesas     = Mesa::all();
-        $menu      = Menu::where('es_actual', true)->with('productos')->first();
-        $cajero    = User::where('rol', 'cajero')->inRandomOrder()->first();
-        $clientes  = User::where('rol', 'cliente')->get();
+        $empresas = Empresa::all();
 
-        if (!$menu || $menu->productos->isEmpty()) {
-            $this->command->warn('⚠️ No hay menú activo o productos asignados al menú.');
-            return;
+        foreach ($empresas as $empresa) {
+            $this->command->info("▶ Generando pedidos para empresa: {$empresa->nombre}");
+
+            $mesas     = Mesa::where('empresa_id', $empresa->id)->get();
+            $menu      = Menu::where('empresa_id', $empresa->id)->where('es_actual', true)->with('productos')->first();
+            $cajero    = User::where('empresa_id', $empresa->id)->where('rol', 'cajero')->inRandomOrder()->first();
+            $clientes  = User::where('empresa_id', $empresa->id)->where('rol', 'cliente')->get();
+
+            if (!$menu || $menu->productos->isEmpty()) {
+                $this->command->warn("⚠️ Menú vacío o sin productos para {$empresa->nombre}");
+                continue;
+            }
+
+            if ($clientes->isEmpty()) {
+                $this->command->warn("⚠️ No hay clientes en {$empresa->nombre}");
+                continue;
+            }
+
+            $this->generarPedidos($empresa->id, $mesas, $menu, $cajero, $clientes, now()->startOfWeek(), 'semana actual');
+            $this->generarPedidos($empresa->id, $mesas, $menu, $cajero, $clientes, now()->subWeek()->startOfWeek(), 'semana pasada');
         }
-
-        if ($clientes->isEmpty()) {
-            $this->command->warn('⚠️ No hay usuarios con rol cliente para asignar a los pedidos.');
-            return;
-        }
-
-        // Pedidos para semana actual y pasada
-        $this->generarPedidos($mesas, $menu, $cajero, $clientes, now()->startOfWeek(), 'semana actual');
-        $this->generarPedidos($mesas, $menu, $cajero, $clientes, now()->subWeek()->startOfWeek(), 'semana pasada');
     }
 
-    private function generarPedidos($mesas, $menu, $cajero, $clientes, Carbon $inicioSemana, string $etiqueta)
+    private function generarPedidos($empresaId, $mesas, $menu, $cajero, $clientes, Carbon $inicioSemana, string $etiqueta)
     {
         foreach (range(0, 6) as $i) {
             foreach (range(1, rand(3, 6)) as $j) {
@@ -52,30 +57,30 @@ class PedidosTableSeeder extends Seeder
                     ->setHour(rand($franja['inicio'], $franja['fin']))
                     ->setMinute(rand(0, 59));
 
-                $mesa = $mesas->random();
+                $mesa    = $mesas->random();
                 $cliente = $clientes->random();
-                $estado = collect(['pagado', 'cerrado', 'servido'])->random();
+                $estado  = collect(['pagado', 'cerrado', 'servido'])->random();
 
                 $pedido = Pedido::create([
-                    'mesa_id'    => $mesa->id,
-                    'usuario_id' => $cliente->id,
-                    'estado'     => $estado,
-                    'created_at' => $fecha,
-                    'updated_at' => $fecha,
+                    'mesa_id'     => $mesa->id,
+                    'usuario_id'  => $cliente->id,
+                    'empresa_id'  => $empresaId,
+                    'estado'      => $estado,
+                    'created_at'  => $fecha,
+                    'updated_at'  => $fecha,
                 ]);
-
-                $this->command->info("Pedido #{$pedido->id} creado para cliente {$cliente->name} (ID: {$cliente->id}), mesa {$mesa->id}, estado '{$estado}'");
 
                 $total = 0;
 
                 foreach ($menu->productos->random(rand(1, 3)) as $producto) {
                     $cantidad = rand(1, 3);
-                    $precio   = $producto->pivot->precio; // Precio del menú actual
+                    $precio   = $producto->pivot->precio;
                     $subtotal = $cantidad * $precio;
 
                     PedidoDetalle::create([
                         'pedido_id'       => $pedido->id,
                         'producto_id'     => $producto->id,
+                        'empresa_id'      => $empresaId,
                         'cantidad'        => $cantidad,
                         'precio_unitario' => $precio,
                         'subtotal'        => $subtotal,
@@ -88,10 +93,11 @@ class PedidosTableSeeder extends Seeder
 
                 $pedido->update(['total' => $total]);
 
-                if ($estado === 'pagado') {
+                if ($estado === 'pagado' && $cajero) {
                     Pago::create([
                         'pedido_id'   => $pedido->id,
-                        'usuario_id'  => $cajero?->id,
+                        'usuario_id'  => $cajero->id,
+                        'empresa_id'  => $empresaId,
                         'monto'       => $total,
                         'metodo_pago' => 'efectivo',
                         'pagado_en'   => $fecha,
@@ -99,9 +105,11 @@ class PedidosTableSeeder extends Seeder
                         'updated_at'  => $fecha,
                     ]);
                 }
+
+                $this->command->info("✔ Pedido #{$pedido->id} para cliente {$cliente->name} (Empresa {$empresaId}) en estado '{$estado}'");
             }
         }
 
-        $this->command->info("✅ Datos insertados para {$etiqueta}");
+        $this->command->info("✅ Datos generados para {$etiqueta} (empresa ID: {$empresaId})");
     }
 }

@@ -5,27 +5,32 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Menu;
 use App\Models\Producto;
+use App\Models\Empresa;
 
 class MenuSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        // Crear menú activo
-        $menu = Menu::create([
-            'nombre' => 'Menú regular',
-            'es_actual' => true,
-        ]);
+        $empresas = Empresa::all();
 
-        // Obtener productos existentes
-        $productos = Producto::all();
-
-        // Asociar productos con precios específicos al menú
-        foreach ($productos as $producto) {
-            $precioMenu = $producto->precio * 0.95; // ejemplo: 5% de descuento en el menú
-
-            $menu->productos()->attach($producto->id, [
-                'precio' => round($precioMenu, 2),
+        foreach ($empresas as $empresa) {
+            // Crear menú para esta empresa
+            $menu = Menu::create([
+                'nombre' => 'Menú regular',
+                'es_actual' => true,
+                'empresa_id' => $empresa->id,
             ]);
+
+            // Obtener productos de esta empresa
+            $productos = Producto::where('empresa_id', $empresa->id)->get();
+
+            foreach ($productos as $producto) {
+                $precioMenu = $producto->precio * 0.95; // 5% descuento
+
+                $menu->productos()->attach($producto->id, [
+                    'precio' => round($precioMenu, 2),
+                ]);
+            }
         }
     }
 }

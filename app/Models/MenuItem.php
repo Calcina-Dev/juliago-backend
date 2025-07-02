@@ -5,20 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Categoria extends Model
+class MenuItem extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
-        'nombre',
-        'destino',      // cocina / bar (si ya lo usas en migraciones)
-        'empresa_id',   // ✅ añadido
+        'empresa_id',
+        'rol',
+        'label',
+        'icon',
+        'route',
+        'orden',
+        'visible',
     ];
-
-    public function productos()
-    {
-        return $this->hasMany(Producto::class);
-    }
 
     public function empresa()
     {

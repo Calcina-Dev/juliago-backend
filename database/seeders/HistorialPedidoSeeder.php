@@ -11,13 +11,21 @@ class HistorialPedidoSeeder extends Seeder
 {
     public function run(): void
     {
-        // Asegurarse de tener usuarios y pedidos
-        User::factory(3)->create();
-        Pedido::factory(10)->create();
+        $pedidos = Pedido::all();
+        $usuarios = User::all();
 
-        // Por cada pedido, crear historial de 2 a 5 transiciones
-        foreach (Pedido::all() as $pedido) {
-            $estados = ['pendiente', 'en_proceso', 'servido', 'pagado', 'cerrado'];
+        $estados = ['pendiente', 'en_proceso', 'servido', 'pagado', 'cerrado'];
+
+        foreach ($pedidos as $pedido) {
+            $empresaId = $pedido->empresa_id;
+
+            $usuariosEmpresa = $usuarios->where('empresa_id', $empresaId);
+
+            // Si no hay usuarios en la empresa, salta este pedido
+            if ($usuariosEmpresa->isEmpty()) {
+                continue;
+            }
+
             $transiciones = [];
 
             for ($i = 1; $i < count($estados); $i++) {
@@ -25,7 +33,8 @@ class HistorialPedidoSeeder extends Seeder
                     'pedido_id' => $pedido->id,
                     'estado_anterior' => $estados[$i - 1],
                     'estado_nuevo' => $estados[$i],
-                    'usuario_id' => User::inRandomOrder()->first()->id,
+                    'usuario_id' => $usuariosEmpresa->random()->id,
+                    'empresa_id' => $empresaId, // ✅ clave nueva
                     'created_at' => now()->subMinutes(rand(10, 100)),
                     'updated_at' => now()->subMinutes(rand(10, 100)),
                 ];

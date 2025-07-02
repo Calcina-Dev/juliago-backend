@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('historial_pedido', function (Blueprint $table) {
+        Schema::create('historial_pedidos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pedido_id')->constrained()->onDelete('cascade');
             $table->string('estado_anterior')->nullable();
@@ -19,6 +19,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('historial_pedido');
+        Schema::dropIfExists('historial_pedidos');
     }
 };

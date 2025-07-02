@@ -15,8 +15,8 @@ use App\Http\Controllers\Api\{
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);  // Registro cliente
 
-// Rutas protegidas por Sanctum
-Route::middleware('auth:sanctum')->group(function () {
+// Rutas protegidas por Sanctum y validadas por empresa
+Route::middleware(['auth:sanctum', 'check.empresa'])->group(function () {
 
     Route::post('logout', [AuthController::class, 'logout']);
 

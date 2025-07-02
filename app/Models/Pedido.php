@@ -10,14 +10,20 @@ class Pedido extends Model
 {
     use SoftDeletes, HasFactory;
 
-    protected $fillable = ['mesa_id', 'estado', 'total'];
+    protected $fillable = [
+        'mesa_id',
+        'usuario_id',
+        'estado',
+        'total',
+        'empresa_id', // ✅ Agregado
+    ];
+
     protected $appends = ['cancelado'];
 
     public function getCanceladoAttribute()
     {
-        return $this->trashed(); // Devuelve true si el pedido fue eliminado (soft delete)
+        return $this->trashed();
     }
-
 
     public function detalles()
     {
@@ -28,6 +34,7 @@ class Pedido extends Model
     {
         return $this->belongsTo(Mesa::class);
     }
+
     public function historial()
     {
         return $this->hasMany(HistorialPedido::class);
@@ -38,5 +45,13 @@ class Pedido extends Model
         return $this->belongsTo(User::class, 'usuario_id');
     }
 
+    public function empresa()
+    {
+        return $this->belongsTo(Empresa::class);
+    }
 
+    public function pagos()
+    {
+        return $this->hasMany(Pago::class);
+    }
 }

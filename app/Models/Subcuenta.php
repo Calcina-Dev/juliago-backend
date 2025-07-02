@@ -5,17 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Pago extends Model
+class Subcuenta extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
         'pedido_id',
-        'usuario_id',
-        'empresa_id', // ✅ nuevo
-        'monto',
-        'metodo_pago',
-        'pagado_en',
+        'usuario_id',    // cliente que pagará esta subcuenta
+        'empresa_id',
+        'total',
+        'estado',        // pendiente, pagado, etc.
     ];
 
     public function pedido()
@@ -31,5 +30,10 @@ class Pago extends Model
     public function empresa()
     {
         return $this->belongsTo(Empresa::class);
+    }
+
+    public function detalles()
+    {
+        return $this->hasMany(SubcuentaDetalle::class);
     }
 }

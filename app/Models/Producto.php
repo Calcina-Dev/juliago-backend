@@ -16,6 +16,7 @@ class Producto extends Model
         'categoria_id',
         'imagen_url',
         'activo',
+        'empresa_id',
     ];
 
     public function categoria()
@@ -28,5 +29,15 @@ class Producto extends Model
         return $this->belongsToMany(Menu::class, 'menu_producto')
                     ->withPivot('precio')
                     ->withTimestamps();
+    }
+
+    public function empresa()
+    {
+        return $this->belongsTo(Empresa::class);
+    }
+
+    public function detallesPedidos()
+    {
+        return $this->hasMany(PedidoDetalle::class);
     }
 }
