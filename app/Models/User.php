@@ -19,7 +19,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-  protected $fillable = ['name', 'email', 'password', 'rol', 'empresa_id'];
+    protected $fillable = ['name', 'email', 'password', 'rol', 'empresa_id'];
 
 
     /**
@@ -41,7 +41,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',F
+            'password' => 'hashed',
         ];
     }
 
@@ -49,5 +49,11 @@ class User extends Authenticatable
     {
         return $this->rol === 'superadmin';
     }
+
+    public function empresa()
+    {
+        return $this->belongsTo(Empresa::class);
+    }
+
 
 }

@@ -14,6 +14,7 @@ class Empresa extends Model
         'logo',
         'moneda',
         'modo_mantenimiento',
+        'activa', // ✅ nuevo campo
     ];
 
     // Relaciones comunes

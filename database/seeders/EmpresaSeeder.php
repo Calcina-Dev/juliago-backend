@@ -14,6 +14,7 @@ class EmpresaSeeder extends Seeder
             'logo' => null,
             'moneda' => 'PEN',
             'modo_mantenimiento' => false,
+            'activa' => true, // ✅ importante
         ]);
 
         Empresa::create([
@@ -21,6 +22,8 @@ class EmpresaSeeder extends Seeder
             'logo' => null,
             'moneda' => 'PEN',
             'modo_mantenimiento' => false,
+            'activa' => false, // ❌ empresa inactiva (puedes probar con este caso)
         ]);
+
     }
 }
